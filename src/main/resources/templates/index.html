@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 AI Web Builder - Smart Agent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 25px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-message {
+            text-align: right;
+        }
+
+        .user-message .text {
+            background: #667eea;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 18px 18px 5px 18px;
+            display: inline-block;
+            max-width: 70%;
+            word-wrap: break-word;
+            text-align: left;
+        }
+
+        .ai-message .text {
+            background: #e9ecef;
+            color: #333;
+            padding: 12px 18px;
+            border-radius: 18px 18px 18px 5px;
+            display: inline-block;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        .ai-message .avatar {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            background: #667eea;
+            border-radius: 50%;
+            color: white;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .input-area {
+            padding: 25px;
+            background: white;
+            border-top: 2px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            padding: 12px 20px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .input-area input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-area button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .input-area button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .input-area button:active {
+            transform: translateY(0);
+        }
+
+        .typing {
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        .typing span {
+            animation: typing 1.4s infinite;
+            margin: 0 3px;
+        }
+
+        .typing span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                opacity: 0.5;
+                transform: translateY(0);
+            }
+            30% {
+                opacity: 1;
+                transform: translateY(-10px);
+            }
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #f5c6cb;
+        }
+
+        .suggested-prompts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .suggested-prompts button {
+            background: #e9ecef;
+            color: #333;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .suggested-prompts button:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+        }
+
+        .empty-state h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI Web Builder</h1>
+            <p>Your intelligent coding assistant - No API keys needed!</p>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <div class="empty-state">
+                <h2>Welcome to AI Agent!</h2>
+                <p>Ask me anything - I can generate code, explain concepts, debug issues, and more!</p>
+                <div class="suggested-prompts" style="margin-top: 20px;">
+                    <button onclick="sendMessage('Generate a hello world program in Java')">Generate Java Code</button>
+                    <button onclick="sendMessage('Explain what an algorithm is')">Explain Algorithm</button>
+                    <button onclick="sendMessage('Help me debug this null pointer error')">Debug Error</button>
+                    <button onclick="sendMessage('Optimize my code for performance')">Optimize Code</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="messageInput" placeholder="Ask me anything..." autocomplete="off">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chatContainer = document.getElementById('chatContainer');
+        const messageInput = document.getElementById('messageInput');
+        let isFirstMessage = true;
+
+        function sendMessage(message = null) {
+            const text = message || messageInput.value.trim();
+            
+            if (!text) return;
+
+            // Clear input
+            messageInput.value = '';
+
+            // Remove empty state on first message
+            if (isFirstMessage) {
+                chatContainer.innerHTML = '';
+                isFirstMessage = false;
+            }
+
+            // Add user message
+            addMessage(text, 'user');
+
+            // Show typing indicator
+            const typingDiv = addMessage(
+                '<span></span><span></span><span></span>',
+                'ai',
+                'typing'
+            );
+
+            // Send to backend
+            fetch('/api/chat/message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Remove typing indicator
+                typingDiv.remove();
+
+                if (data.success) {
+                    addMessage(data.message, 'ai');
+                } else {
+                    addMessage('Error: ' + (data.error || 'Unknown error'), 'error');
+                }
+                
+                // Scroll to bottom
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            })
+            .catch(error => {
+                typingDiv.remove();
+                addMessage('Connection error: ' + error.message, 'error');
+            });
+        }
+
+        function addMessage(text, type, className = '') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ' + type + '-message ' + className;
+            
+            if (type === 'ai') {
+                messageDiv.innerHTML = `<span class="avatar">🤖</span><div class="text">${escapeHtml(text)}</div>`;
+            } else if (type === 'error') {
+                messageDiv.innerHTML = `<div class="error">${escapeHtml(text)}</div>`;
+            } else {
+                messageDiv.innerHTML = `<div class="text">${escapeHtml(text)}</div>`;
+            }
+            
+            chatContainer.appendChild(messageDiv);
+            return messageDiv;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Send message on Enter key
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Focus on input
+        messageInput.focus();
+    </script>
+</body>
+</html>
